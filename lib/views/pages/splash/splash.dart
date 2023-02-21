@@ -209,3 +209,38 @@ class _SplashPageState extends State<SplashPage> {
     );
   }
 }
+
+animationTextWidget(
+    {required String tex,
+    required double beging,
+    required double end,
+    required double animvalue,
+    required bool isMinus}) {
+  return TweenAnimationBuilder<double?>(
+      tween: Tween(begin: beging, end: end),
+      duration: const Duration(seconds: 3),
+      child: Text(
+        tex,
+        style: GoogleFonts.openSans(
+            fontSize: 18.0, color: titleColor, fontWeight: FontWeight.w500),
+      ),
+      builder: (context, value, child) {
+        if (isMinus == true) {
+          return Transform.translate(
+            offset: Offset(
+              -value! * animvalue,
+              0.0,
+            ),
+            child: child,
+          );
+        } else {
+          return Transform.translate(
+            offset: Offset(
+              value! * animvalue,
+              0.0,
+            ),
+            child: child,
+          );
+        }
+      });
+}

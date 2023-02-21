@@ -49,6 +49,10 @@ dev_dependencies:
   google_fonts: ^4.0.3
   glassmorphism: ^3.0.0
   get: ^4.6.5
+  translator: ^0.1.7
+  animated_widgets: ^1.1.0
+  speech_to_text: ^6.1.1
+  lottie: ^2.2.0
 
 
 
@@ -61,5 +65,6 @@ flutter:
   assets:
       - assets/icons/
       - assets/images/
+      - assets/lotties/
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg

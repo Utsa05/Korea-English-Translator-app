@@ -1,12 +1,16 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 // ignore_for_file: prefer_const_constructors, depend_on_referenced_packages
 
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:korea_to_english_translator/views/constants/assets.dart';
+import 'package:get/get.dart';
 import 'package:glassmorphism/glassmorphism.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:lottie/lottie.dart';
+import 'package:korea_to_english_translator/controller/home.dart';
+import 'package:korea_to_english_translator/views/constants/assets.dart';
 import 'package:korea_to_english_translator/views/constants/colors.dart';
-
 import 'package:korea_to_english_translator/views/pages/home/components/drawer.dart';
+import 'package:korea_to_english_translator/views/widgets/snackbar.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -17,6 +21,9 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
+  final _homeController = Get.put(HomeController());
+  bool animated = false;
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -24,7 +31,7 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       drawer: AppDrawer(size: size),
       key: _scaffoldKey,
-      appBar: appBar(_scaffoldKey),
+      appBar: appBar(_scaffoldKey, _homeController),
       extendBodyBehindAppBar: true,
       body: Container(
         height: size.height,
@@ -65,8 +72,14 @@ class _HomePageState extends State<HomePage> {
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  TypeView(size: size),
-                  ResultView(size: size),
+                  TypeView(
+                    size: size,
+                    homeController: _homeController,
+                  ),
+                  ResultView(
+                    size: size,
+                    homeController: _homeController,
+                  ),
                 ],
               ),
             )),
@@ -74,7 +87,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  AppBar appBar(GlobalKey<ScaffoldState> key) {
+  AppBar appBar(GlobalKey<ScaffoldState> key, HomeController controller) {
     return AppBar(
       elevation: 0.0,
       backgroundColor: Colors.transparent,
@@ -89,88 +102,114 @@ class _HomePageState extends State<HomePage> {
             color: blackColor,
           )),
       centerTitle: true,
-      title: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            "English",
-            style: GoogleFonts.openSans(
-                fontSize: 18.0, color: titleColor, fontWeight: FontWeight.w500),
-          ),
-          const SizedBox(
-            width: 20.0,
-          ),
-          // CircleAvatar(
-          //   backgroundColor: whitColor,
-          // child: IconButton(
-          //   splashRadius: 25.0,
-          //   onPressed: () {},
-          //   icon: const Icon(
-          //     Icons.compare_arrows_outlined,
-          //     color: titleColor,
-          //   ),
-          // ),
-          // ),
-          GlassmorphicContainer(
-              shape: BoxShape.circle,
-              width: 40,
-              height: 40,
-              borderRadius: 20,
-              blur: 10,
-              alignment: Alignment.bottomCenter,
-              border: 1,
-              linearGradient: LinearGradient(
+      title: Obx(() {
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: 65.0,
+              child: AnimatedDefaultTextStyle(
+                curve: Curves.fastLinearToSlowEaseIn,
+                style: animated
+                    ? GoogleFonts.openSans(
+                        fontSize: 18.0,
+                        color: titleColor,
+                        fontWeight: FontWeight.w500)
+                    : GoogleFonts.openSans(
+                        fontSize: 18.0,
+                        color: titleColor,
+                        fontWeight: FontWeight.w500),
+                duration: Duration(milliseconds: 200),
+                child: Text(
+                  controller.sendLang.value,
+                ),
+              ),
+            ),
+            SizedBox(
+              width: controller.sendLang.value == "English" ? 6.0 : 0,
+            ),
+            GlassmorphicContainer(
+                shape: BoxShape.circle,
+                width: 40,
+                height: 40,
+                borderRadius: 20,
+                blur: 10,
+                alignment: Alignment.bottomCenter,
+                border: 1,
+                linearGradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Color.fromARGB(255, 255, 0, 0).withOpacity(0.1),
+                      Color.fromARGB(255, 44, 193, 243).withOpacity(0.05),
+                    ],
+                    stops: const [
+                      0.1,
+                      1,
+                    ]),
+                borderGradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    Color.fromARGB(255, 255, 0, 0).withOpacity(0.1),
-                    Color.fromARGB(255, 44, 193, 243).withOpacity(0.05),
+                    Color(0xFFffffff).withOpacity(0.5),
+                    Color((0xFFFFFFFF)).withOpacity(0.5),
                   ],
-                  stops: const [
-                    0.1,
-                    1,
-                  ]),
-              borderGradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFFffffff).withOpacity(0.5),
-                  Color((0xFFFFFFFF)).withOpacity(0.5),
-                ],
-              ),
-              child: IconButton(
-                splashColor: bgColorPro,
-                splashRadius: 25.0,
-                onPressed: () {},
-                icon: const Icon(
-                  Icons.compare_arrows_outlined,
-                  color: whitColor,
                 ),
-              )),
-          const SizedBox(
-            width: 18.0,
-          ),
-          Text(
-            "Korea",
-            style: GoogleFonts.openSans(
-                fontSize: 20.0, color: titleColor, fontWeight: FontWeight.w500),
-          ),
-          const SizedBox(
-            width: 20.0,
-          ),
-        ],
-      ),
+                child: IconButton(
+                  splashColor: bgColorPro,
+                  splashRadius: 25.0,
+                  onPressed: () {
+                    setState(() {
+                      animated = !animated;
+                    });
+                    controller.swapLanguage();
+                  },
+                  icon: const Icon(
+                    Icons.compare_arrows_outlined,
+                    color: whitColor,
+                  ),
+                )),
+            SizedBox(
+              width: 14.0,
+            ),
+            SizedBox(
+              width: 65.0,
+              child: AnimatedDefaultTextStyle(
+                curve: Curves.bounceInOut,
+                style: animated == false
+                    ? GoogleFonts.openSans(
+                        fontSize: 18.0,
+                        color: titleColor,
+                        fontWeight: FontWeight.w500)
+                    : GoogleFonts.openSans(
+                        fontSize: 18.0,
+                        color: titleColor,
+                        fontWeight: FontWeight.w500),
+                duration: Duration(milliseconds: 200),
+                child: Text(
+                  controller.resultLang.value,
+                ),
+              ),
+            ),
+            SizedBox(
+              width: 10.0,
+            ),
+          ],
+        );
+      }),
     );
   }
 }
 
 class ResultView extends StatelessWidget {
   const ResultView({
-    super.key,
+    Key? key,
     required this.size,
-  });
+    required this.homeController,
+  }) : super(key: key);
 
   final Size size;
+  final HomeController homeController;
 
   @override
   Widget build(BuildContext context) {
@@ -201,54 +240,73 @@ class ResultView extends StatelessWidget {
             Color((0xFFFFFFFF)).withOpacity(0.5),
           ],
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-                child: Padding(
-              padding:
-                  const EdgeInsets.only(left: 15.0, right: 15.0, top: 14.0),
-              child: Text(
-                "Sgong HST Pgarlo",
-                style: GoogleFonts.openSans(color: blackColor),
-              ),
-            )),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: const [
-                  CircleButton(
-                    icon: Icons.favorite_border_outlined,
-                    color: bgColor,
-                  ),
-                  SizedBox(
-                    width: 12.0,
-                  ),
-                  CircleButton(
-                    icon: Icons.copy_outlined,
-                    color: bgColor,
-                  ),
-                  SizedBox(
-                    width: 12.0,
-                  ),
-                  CircleButton(
-                    icon: Icons.share_outlined,
-                    color: bgColor,
-                  ),
-                  SizedBox(
-                    width: 12.0,
-                  ),
-                  CircleButton(
-                    icon: Icons.play_arrow_outlined,
-                    color: bgColor,
-                  ),
-                ],
-              ),
-            )
-          ],
-        ));
+        child: Obx(() {
+          return homeController.isTranslating.value == false
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                        child: Padding(
+                      padding: const EdgeInsets.only(
+                          left: 15.0, right: 15.0, top: 14.0),
+                      child: SingleChildScrollView(
+                        physics: const BouncingScrollPhysics(),
+                        child: Obx(() {
+                          return Text(
+                            homeController.translatorText.value,
+                            style: GoogleFonts.openSans(color: blackColor),
+                            textAlign: TextAlign.start,
+                          );
+                        }),
+                      ),
+                    )),
+                    homeController.textController.value.text.isNotEmpty
+                        ? Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                CircleButton(
+                                  icon: Icons.favorite_border_outlined,
+                                  color: bgColor,
+                                  tap: () {},
+                                ),
+                                SizedBox(
+                                  width: 12.0,
+                                ),
+                                CircleButton(
+                                  icon: Icons.copy_outlined,
+                                  color: bgColor,
+                                  tap: () {},
+                                ),
+                                SizedBox(
+                                  width: 12.0,
+                                ),
+                                CircleButton(
+                                  icon: Icons.share_outlined,
+                                  color: bgColor,
+                                  tap: () {},
+                                ),
+                                SizedBox(
+                                  width: 12.0,
+                                ),
+                                CircleButton(
+                                  icon: Icons.play_arrow_outlined,
+                                  color: bgColor,
+                                  tap: () {},
+                                ),
+                              ],
+                            ),
+                          )
+                        : const SizedBox()
+                  ],
+                )
+              : Center(
+                  child: CircularProgressIndicator(
+                  color: blackColor.withOpacity(0.2),
+                ));
+        }));
   }
 }
 
@@ -256,10 +314,11 @@ class TypeView extends StatelessWidget {
   const TypeView({
     super.key,
     required this.size,
+    required this.homeController,
   });
 
   final Size size;
-
+  final HomeController homeController;
   @override
   Widget build(BuildContext context) {
     return GlassmorphicContainer(
@@ -293,6 +352,7 @@ class TypeView extends StatelessWidget {
           children: [
             Expanded(
                 child: TextField(
+              controller: homeController.textController.value,
               style: GoogleFonts.openSans(color: titleColor),
               maxLines: 12,
               cursorColor: bgColor,
@@ -321,6 +381,7 @@ class TypeView extends StatelessWidget {
                   CircleButton(
                     icon: Icons.bookmark_outline_outlined,
                     color: bgColor,
+                    tap: () {},
                   ),
                   SizedBox(
                     width: 12.0,
@@ -328,6 +389,7 @@ class TypeView extends StatelessWidget {
                   CircleButton(
                     icon: Icons.camera_alt_outlined,
                     color: bgColor,
+                    tap: () {},
                   ),
                   SizedBox(
                     width: 12.0,
@@ -335,6 +397,29 @@ class TypeView extends StatelessWidget {
                   CircleButton(
                     icon: Icons.mic_outlined,
                     color: bgColor,
+                    tap: () {
+                      homeController.listen(context);
+                      showModalBottomSheet(
+                          isDismissible: false,
+                          enableDrag: false,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(25.0)),
+                          context: context,
+                          backgroundColor: Colors.transparent,
+                          elevation: 0.0,
+                          builder: (builder) {
+                            return Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Container(
+                                width: 300.0,
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(25.0),
+                                    color: whitColor.withOpacity(0.2)),
+                                child: Lottie.asset('assets/lotties/mic.json'),
+                              ),
+                            );
+                          });
+                    },
                   ),
                   SizedBox(
                     width: 12.0,
@@ -349,13 +434,33 @@ class TypeView extends StatelessWidget {
                   CircleButton(
                     icon: Icons.close,
                     color: redColor,
+                    tap: () {
+                      if (homeController.textController.value.text.isNotEmpty) {
+                        homeController.textController.value.clear();
+                      } else {
+                        appSnackBar(context, "Nothing Typed");
+                      }
+                    },
                   ),
 
                   SizedBox(
                     width: 12.0,
                   ),
                   IconButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        if (homeController
+                            .textController.value.text.isNotEmpty) {
+                          if (homeController.sendLang.value == "Korea") {
+                            homeController.translateNow(
+                                from: 'ko', to: 'en', context: context);
+                          } else {
+                            homeController.translateNow(
+                                from: 'en', to: 'ko', context: context);
+                          }
+                        } else {
+                          appSnackBar(context, "Pleasy Type Somthing");
+                        }
+                      },
                       icon: Icon(
                         Icons.send_outlined,
                         color: bgColor,
@@ -373,10 +478,12 @@ class CircleButton extends StatelessWidget {
     super.key,
     required this.icon,
     required this.color,
+    required this.tap,
   });
 
   final IconData icon;
   final Color color;
+  final GestureTapCallback tap;
   @override
   Widget build(BuildContext context) {
     return GlassmorphicContainer(
@@ -409,7 +516,7 @@ class CircleButton extends StatelessWidget {
         child: IconButton(
           splashColor: bgColorPro,
           splashRadius: 25.0,
-          onPressed: () {},
+          onPressed: tap,
           icon: Icon(
             icon,
             color: color,
