@@ -1,14 +1,14 @@
 // ignore_for_file: prefer_const_constructors, depend_on_referenced_packages
 
 import 'dart:async';
-
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:korea_to_english_translator/views/constants/assets.dart';
 import 'package:korea_to_english_translator/views/constants/colors.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:korea_to_english_translator/views/constants/routes.dart';
 import 'package:korea_to_english_translator/views/constants/strings.dart';
 import 'package:glassmorphism/glassmorphism.dart';
-import 'package:korea_to_english_translator/views/pages/home/home.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({Key? key}) : super(key: key);
@@ -22,8 +22,7 @@ class _SplashPageState extends State<SplashPage> {
   @override
   void initState() {
     _timer = Timer(const Duration(seconds: 4), () {
-      Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (builder) => const HomePage()));
+      Get.offNamed(homeRoute);
     });
     super.initState();
   }

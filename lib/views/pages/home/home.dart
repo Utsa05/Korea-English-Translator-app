@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, depend_on_referenced_packages
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -6,22 +6,32 @@ import 'package:korea_to_english_translator/views/constants/assets.dart';
 import 'package:glassmorphism/glassmorphism.dart';
 import 'package:korea_to_english_translator/views/constants/colors.dart';
 
-class HomePage extends StatelessWidget {
+import 'package:korea_to_english_translator/views/pages/home/components/drawer.dart';
+
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
-      appBar: appBar(),
+      drawer: AppDrawer(size: size),
+      key: _scaffoldKey,
+      appBar: appBar(_scaffoldKey),
       extendBodyBehindAppBar: true,
       body: Container(
         height: size.height,
         width: size.width,
         decoration: const BoxDecoration(
             image: DecorationImage(
-                opacity: 0.8,
+                //opacity: 0.9,
                 image: AssetImage(
                   randomBg,
                 ),
@@ -64,14 +74,20 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  AppBar appBar() {
+  AppBar appBar(GlobalKey<ScaffoldState> key) {
     return AppBar(
       elevation: 0.0,
       backgroundColor: Colors.transparent,
-      leading: const Icon(
-        Icons.menu_outlined,
-        color: titleColor,
-      ),
+      leading: IconButton(
+          splashRadius: 20.0,
+          onPressed: () {
+            key.currentState!.openDrawer();
+          },
+          icon: Image.asset(
+            'assets/icons/hamburger.png',
+            width: 28.0,
+            color: blackColor,
+          )),
       centerTitle: true,
       title: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -281,6 +297,7 @@ class TypeView extends StatelessWidget {
               maxLines: 12,
               cursorColor: bgColor,
               decoration: InputDecoration(
+                hintStyle: GoogleFonts.openSans(color: titleColor),
                 isCollapsed: true,
                 focusColor: bgColor,
                 hoverColor: bgColor,
@@ -300,9 +317,9 @@ class TypeView extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
-                children: const [
+                children: [
                   CircleButton(
-                    icon: Icons.save_outlined,
+                    icon: Icons.bookmark_outline_outlined,
                     color: bgColor,
                   ),
                   SizedBox(
@@ -322,17 +339,27 @@ class TypeView extends StatelessWidget {
                   SizedBox(
                     width: 12.0,
                   ),
-                  CircleButton(
-                    icon: Icons.draw_outlined,
-                    color: bgColor,
-                  ),
-                  SizedBox(
-                    width: 12.0,
-                  ),
+                  // CircleButton(
+                  //   icon: Icons.draw_outlined,
+                  //   color: bgColor,
+                  // ),
+                  // SizedBox(
+                  //   width: 12.0,
+                  // ),
                   CircleButton(
                     icon: Icons.close,
                     color: redColor,
                   ),
+
+                  SizedBox(
+                    width: 12.0,
+                  ),
+                  IconButton(
+                      onPressed: () {},
+                      icon: Icon(
+                        Icons.send_outlined,
+                        color: bgColor,
+                      ))
                 ],
               ),
             )

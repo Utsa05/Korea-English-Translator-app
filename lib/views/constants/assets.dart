@@ -6,3 +6,4 @@ const String squareMessage = "assets/images/square_message.png";
 const String bubbleMessage = "assets/images/bubble_message.png";
 const String skyBg = "assets/images/sky.jpg";
 const String randomBg = "assets/images/random.jpg";
+const String menuIcon = "assets/icons/menu.png";
