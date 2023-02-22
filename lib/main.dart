@@ -21,6 +21,7 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: appName,
+      // visualDensity: VisualDensity.adaptivePlatformDensity,
       theme: ThemeData(),
       getPages: AppRoute.routes(),
       initialRoute: initialRoute,

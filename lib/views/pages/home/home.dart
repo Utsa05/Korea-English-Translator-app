@@ -3,6 +3,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:glassmorphism/glassmorphism.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
@@ -389,7 +390,105 @@ class TypeView extends StatelessWidget {
                   CircleButton(
                     icon: Icons.camera_alt_outlined,
                     color: bgColor,
-                    tap: () {},
+                    tap: () {
+                      // homeController.getImage(
+                      //   context,
+                      //   ImageSource.gallery,
+                      // );
+
+                      showModalBottomSheet(
+                          // isDismissible: false,
+                          // enableDrag: false,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(25.0)),
+                          context: context,
+                          backgroundColor: Colors.transparent,
+                          elevation: 0.0,
+                          builder: (builder) {
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 100.0, vertical: 15.0),
+                              child: Container(
+                                width: 300.0,
+                                height: 130.0,
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(25.0),
+                                    color: whitColor.withOpacity(0.2)),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          "Choose",
+                                          style: GoogleFonts.openSans(
+                                              color: whitColor, fontSize: 18.0),
+                                        ),
+                                        IconButton(
+                                            splashRadius: 15.0,
+                                            onPressed: () {
+                                              Navigator.pop(context);
+                                            },
+                                            icon: Icon(
+                                              Icons.close_outlined,
+                                              color: Colors.red,
+                                            ))
+                                      ],
+                                    ),
+                                    SizedBox(
+                                      width: 100.0,
+                                      child: Divider(
+                                        color: whitColor,
+                                      ),
+                                    ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        CircleAvatar(
+                                          backgroundColor:
+                                              blackColor.withOpacity(0.5),
+                                          child: IconButton(
+                                              splashRadius: 25.0,
+                                              onPressed: () {
+                                                Navigator.pop(context);
+                                                homeController.getImage(context,
+                                                    ImageSource.camera);
+                                              },
+                                              icon: Icon(
+                                                Icons.camera_alt_outlined,
+                                                color: bgColorPro,
+                                              )),
+                                        ),
+                                        SizedBox(
+                                          width: 20.0,
+                                        ),
+                                        CircleAvatar(
+                                          backgroundColor:
+                                              blackColor.withOpacity(0.5),
+                                          child: IconButton(
+                                              splashRadius: 25.0,
+                                              onPressed: () {
+                                                Navigator.pop(context);
+                                                homeController.getImage(context,
+                                                    ImageSource.gallery);
+                                              },
+                                              icon: Icon(
+                                                Icons.save_outlined,
+                                                color: bgColor,
+                                              )),
+                                        ),
+                                      ],
+                                    )
+                                  ],
+                                ),
+                              ),
+                            );
+                          });
+                    },
                   ),
                   SizedBox(
                     width: 12.0,

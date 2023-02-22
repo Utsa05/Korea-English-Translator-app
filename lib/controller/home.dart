@@ -1,8 +1,11 @@
-// ignore_for_file: unused_import, depend_on_referenced_packages, avoid_print
+// ignore_for_file: unused_import, depend_on_referenced_packages, avoid_print, use_build_context_synchronously
 
+import 'package:korea_to_english_translator/views/constants/colors.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
-
+import 'package:image_picker/image_picker.dart';
+import 'package:google_ml_kit/google_ml_kit.dart';
+import 'package:lottie/lottie.dart';
 import 'dart:io';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:flutter/widgets.dart';
@@ -26,7 +29,14 @@ class HomeController extends GetxController {
   var isListening = false.obs;
   var text = 'default'.obs;
 
+  var textScanning = false.obs;
+  var imageFile = XFile("path").obs;
+  var scannedText = "".obs;
+
+  final ImagePicker picker = ImagePicker();
+
   void swapLanguage() {
+    prevText.value = "";
     if (sendLang.value == "Korea") {
       sendLang.value = "English";
       resultLang.value = "Korea";
@@ -95,5 +105,61 @@ class HomeController extends GetxController {
       isListening.value = false;
       _speech.stop();
     }
+  }
+
+  void getImage(BuildContext context, ImageSource source) async {
+    try {
+      final pickedImage = await ImagePicker().pickImage(source: source);
+      if (pickedImage != null) {
+        textScanning.value = true;
+        imageFile.value = pickedImage;
+
+        getRecognisedText(pickedImage);
+      } else {
+        appSnackBar(context, "Image Not Selected");
+      }
+    } catch (e) {
+      textScanning.value = false;
+      imageFile.value = XFile("path");
+      scannedText.value = "Error occured while scanning";
+    }
+  }
+
+  void getRecognisedText(XFile image) async {
+    Get.bottomSheet(
+      SizedBox(
+        height: 100.0,
+        child: Column(
+          children: [
+            Center(
+              child:
+                  Lottie.asset('assets/lotties/Artboard.json', height: 100.0),
+            ),
+          ],
+        ),
+      ),
+      backgroundColor: whitColor.withOpacity(0.2),
+      isDismissible: false,
+      enableDrag: false,
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+    );
+    final inputImage = InputImage.fromFilePath(image.path);
+    final textDetector = GoogleMlKit.vision.textRecognizer();
+    RecognizedText recognisedText = await textDetector.processImage(inputImage);
+    await textDetector.close();
+    scannedText.value = "";
+    for (TextBlock block in recognisedText.blocks) {
+      for (TextLine line in block.lines) {
+        scannedText.value = "${scannedText + line.text}\n";
+      }
+    }
+    textScanning.value = false;
+    textController.value.text = scannedText.value;
+    print(scannedText.value);
+    Get.back();
+    print("done Rec");
   }
 }

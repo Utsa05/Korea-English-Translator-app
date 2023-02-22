@@ -53,6 +53,11 @@ dev_dependencies:
   animated_widgets: ^1.1.0
   speech_to_text: ^6.1.1
   lottie: ^2.2.0
+  learning_text_recognition: ^0.0.4
+  provider: ^6.0.5
+  image_picker: ^0.8.6+2
+  google_mlkit_text_recognition: ^0.5.0
+  google_ml_kit: ^0.13.0
 
 
 
