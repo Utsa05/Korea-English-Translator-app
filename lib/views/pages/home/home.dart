@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:glassmorphism/glassmorphism.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:korea_to_english_translator/model/translate.dart';
 import 'package:lottie/lottie.dart';
 import 'package:korea_to_english_translator/controller/home.dart';
 import 'package:korea_to_english_translator/views/constants/assets.dart';
@@ -271,7 +272,21 @@ class ResultView extends StatelessWidget {
                                 CircleButton(
                                   icon: Icons.favorite_border_outlined,
                                   color: bgColor,
-                                  tap: () {},
+                                  tap: () {
+                                    if (homeController
+                                        .textController.value.text.isNotEmpty) {
+                                      homeController.insert(TranslateModel(
+                                          sendLang: homeController
+                                              .textController.value.text,
+                                          resultLang: homeController
+                                              .translatorText.value));
+
+                                      appSnackBar(context, "Added To Favorite");
+                                    } else {
+                                      appSnackBar(
+                                          context, "Please Translate First");
+                                    }
+                                  },
                                 ),
                                 SizedBox(
                                   width: 12.0,
@@ -382,7 +397,19 @@ class TypeView extends StatelessWidget {
                   CircleButton(
                     icon: Icons.bookmark_outline_outlined,
                     color: bgColor,
-                    tap: () {},
+                    tap: () {
+                      if (homeController.saveText.value.isNotEmpty) {
+                        if (homeController.textController.value.text !=
+                            homeController.saveText.value) {
+                          homeController.textController.value.text =
+                              homeController.saveText.value;
+                        } else {
+                          appSnackBar(context, "No Need to Change");
+                        }
+                      } else {
+                        appSnackBar(context, "Nothing Saved");
+                      }
+                    },
                   ),
                   SizedBox(
                     width: 12.0,

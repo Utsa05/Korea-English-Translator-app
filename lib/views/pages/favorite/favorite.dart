@@ -2,9 +2,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:glassmorphism/glassmorphism.dart';
+import 'package:korea_to_english_translator/controller/home.dart';
 import 'package:korea_to_english_translator/views/constants/assets.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:korea_to_english_translator/views/constants/colors.dart';
+import 'package:get/get.dart';
+import 'package:get/get.dart';
 
 class FavoritePage extends StatefulWidget {
   const FavoritePage({super.key});
@@ -18,35 +21,36 @@ class _FavoritePageState extends State<FavoritePage> {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final scrollcontroller = ScrollController();
+    final HomeController homeController = Get.put(HomeController());
 
-    List<dynamic> list = [
-      {"sendLang": "How are you", "resultLang": "Kgog Ego Yne"},
-      {
-        "sendLang": "Where is the rest room",
-        "resultLang": "Lgarie ugeiw Kgog Ego Yne"
-      },
-      {
-        "sendLang": "Can you tell me how can i go to Korean Goverment Varsity",
-        "resultLang":
-            "Ngeiw Rgerjer Kuregew Nerweew Kijdsf Ghere Khdsfn Kgog Ego Yne"
-      },
-      {"sendLang": "How are you", "resultLang": "Kgog Ego Yne"},
-      {"sendLang": "How are you", "resultLang": "Kgog Ego Yne"},
-      {
-        "sendLang": "Can you tell me how can i go to Korean Goverment Varsity",
-        "resultLang":
-            "Ngeiw Rgerjer Kuregew Nerweew Kijdsf Ghere Khdsfn Kgog Ego Yne"
-      },
-      {"sendLang": "How are you", "resultLang": "Kgog Ego Yne"},
-      {"sendLang": "How are you", "resultLang": "Kgog Ego Yne"},
-      {
-        "sendLang": "Can you tell me how can i go to Korean Goverment Varsity",
-        "resultLang":
-            "Ngeiw Rgerjer Kuregew Nerweew Kijdsf Ghere Khdsfn Kgog Ego Yne"
-      },
-      {"sendLang": "How are you", "resultLang": "Kgog Ego Yne"},
-      {"sendLang": "How are you", "resultLang": "Kgog Ego Yne"},
-    ];
+    // List<dynamic> list = [
+    //   {"sendLang": "How are you", "resultLang": "Kgog Ego Yne"},
+    //   {
+    //     "sendLang": "Where is the rest room",
+    //     "resultLang": "Lgarie ugeiw Kgog Ego Yne"
+    //   },
+    //   {
+    //     "sendLang": "Can you tell me how can i go to Korean Goverment Varsity",
+    //     "resultLang":
+    //         "Ngeiw Rgerjer Kuregew Nerweew Kijdsf Ghere Khdsfn Kgog Ego Yne"
+    //   },
+    //   {"sendLang": "How are you", "resultLang": "Kgog Ego Yne"},
+    //   {"sendLang": "How are you", "resultLang": "Kgog Ego Yne"},
+    //   {
+    //     "sendLang": "Can you tell me how can i go to Korean Goverment Varsity",
+    //     "resultLang":
+    //         "Ngeiw Rgerjer Kuregew Nerweew Kijdsf Ghere Khdsfn Kgog Ego Yne"
+    //   },
+    //   {"sendLang": "How are you", "resultLang": "Kgog Ego Yne"},
+    //   {"sendLang": "How are you", "resultLang": "Kgog Ego Yne"},
+    //   {
+    //     "sendLang": "Can you tell me how can i go to Korean Goverment Varsity",
+    //     "resultLang":
+    //         "Ngeiw Rgerjer Kuregew Nerweew Kijdsf Ghere Khdsfn Kgog Ego Yne"
+    //   },
+    //   {"sendLang": "How are you", "resultLang": "Kgog Ego Yne"},
+    //   {"sendLang": "How are you", "resultLang": "Kgog Ego Yne"},
+    // ];
 
     return Scaffold(
         extendBodyBehindAppBar: false,
@@ -106,56 +110,74 @@ class _FavoritePageState extends State<FavoritePage> {
                 Color.fromARGB(255, 255, 18, 117).withOpacity(0.5),
               ],
             ),
-            child: ListView.builder(
-                controller: scrollcontroller,
-                itemCount: list.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 10.0, vertical: 8.0),
-                    title: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8.0, vertical: 6.0),
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(7.0),
-                              topRight: Radius.circular(7.0)),
-                          color: bgColorPro.withOpacity(0.2)),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Text(
-                              list[index]['sendLang'],
-                              style: GoogleFonts.openSans(
-                                  fontSize: 17.0, color: bgColor),
-                            ),
+            child: Obx(() {
+              return homeController.isFething.value == false
+                  ? homeController.padList.isNotEmpty
+                      ? ListView.builder(
+                          controller: scrollcontroller,
+                          itemCount: homeController.padList.length,
+                          itemBuilder: (context, index) {
+                            return ListTile(
+                              contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 10.0, vertical: 8.0),
+                              title: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8.0, vertical: 6.0),
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.only(
+                                        topLeft: Radius.circular(7.0),
+                                        topRight: Radius.circular(7.0)),
+                                    color: bgColorPro.withOpacity(0.2)),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        homeController.padList[index].sendLang,
+                                        style: GoogleFonts.openSans(
+                                            fontSize: 17.0, color: bgColor),
+                                      ),
+                                    ),
+                                    IconButton(
+                                        onPressed: () {
+                                          homeController.delete(homeController
+                                              .padList[index].id!);
+                                          homeController.fetch();
+                                        },
+                                        icon: Icon(
+                                          Icons.delete_outline,
+                                          color: Colors.red.withOpacity(0.4),
+                                        )),
+                                  ],
+                                ),
+                              ),
+                              subtitle: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8.0, vertical: 6.0),
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.only(
+                                        bottomLeft: Radius.circular(7.0),
+                                        bottomRight: Radius.circular(7.0)),
+                                    color: Colors.blue.withOpacity(0.1)),
+                                child: Text(
+                                  homeController.padList[index].resultLang,
+                                  style: GoogleFonts.openSans(
+                                      fontSize: 15.0, color: titleColor),
+                                ),
+                              ),
+                            );
+                          })
+                      : Center(
+                          child: Text(
+                            "Empty",
+                            style: GoogleFonts.openSans(fontSize: 17.0),
                           ),
-                          IconButton(
-                              onPressed: () {},
-                              icon: Icon(
-                                Icons.delete_outline,
-                                color: Colors.red.withOpacity(0.4),
-                              )),
-                        ],
-                      ),
-                    ),
-                    subtitle: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8.0, vertical: 6.0),
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.only(
-                              bottomLeft: Radius.circular(7.0),
-                              bottomRight: Radius.circular(7.0)),
-                          color: Colors.blue.withOpacity(0.1)),
-                      child: Text(
-                        list[index]['resultLang'],
-                        style: GoogleFonts.openSans(
-                            fontSize: 15.0, color: titleColor),
-                      ),
-                    ),
-                  );
-                }),
+                        )
+                  : Center(
+                      child: CircularProgressIndicator(),
+                    );
+            }),
           ),
         ));
   }

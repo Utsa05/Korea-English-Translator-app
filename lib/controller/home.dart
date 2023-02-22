@@ -1,5 +1,6 @@
 // ignore_for_file: unused_import, depend_on_referenced_packages, avoid_print, use_build_context_synchronously
 
+import 'package:korea_to_english_translator/model/translate.dart';
 import 'package:korea_to_english_translator/views/constants/colors.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
@@ -12,6 +13,8 @@ import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:korea_to_english_translator/views/widgets/snackbar.dart';
 import 'package:translator/translator.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:path/path.dart';
 
 class HomeController extends GetxController {
   var textController = TextEditingController().obs;
@@ -22,6 +25,7 @@ class HomeController extends GetxController {
   var isTranslating = false.obs;
   var prevText = "".obs;
   var prevTanslateText = "".obs;
+  var saveText = "".obs;
 
   final stt.SpeechToText _speech = stt.SpeechToText();
 
@@ -34,6 +38,12 @@ class HomeController extends GetxController {
   var scannedText = "".obs;
 
   final ImagePicker picker = ImagePicker();
+
+  //db
+  var isFething = true.obs;
+  var padList = <TranslateModel>[].obs;
+
+  //methods
 
   void swapLanguage() {
     prevText.value = "";
@@ -63,6 +73,7 @@ class HomeController extends GetxController {
           print(translatorText.value);
           prevText.value = textController.value.text;
           prevTanslateText.value = translatorText.value;
+          saveText.value = textController.value.text;
         });
       } else {
         translatorText.value = prevTanslateText.value;
@@ -161,5 +172,69 @@ class HomeController extends GetxController {
     print(scannedText.value);
     Get.back();
     print("done Rec");
+  }
+
+  @override
+  void onInit() {
+    fetch();
+    super.onInit();
+  }
+
+  fetch() async {
+    padList.value = await fetchList().whenComplete(() {
+      isFething.value = false;
+      print("Congress Feched");
+      print(padList.length);
+    });
+  }
+
+  //db
+  String dbName = 'MYDB.db';
+  Future<Database> initDb() async {
+    final filePath = await getDatabasesPath();
+    final path = join(filePath, dbName);
+
+    return openDatabase(path, onCreate: (database, version) async {
+      String textTYPE = 'TEXT NOT NULL';
+      String idTYPE = 'INTEGER PRIMARY KEY AUTOINCREMENT';
+
+      await database.execute('''
+        CREATE TABLE MYDB(
+          id $idTYPE,
+          sendLang $textTYPE,
+          resultLang $textTYPE
+        )
+        
+        ''');
+    }, version: 1);
+  }
+
+  Future<bool> insert(TranslateModel translateModel) async {
+    Database db = await initDb();
+    db.insert('MYDB', translateModel.joMap());
+    fetch();
+    return true;
+  }
+
+  Future<List<TranslateModel>> fetchList() async {
+    Database db = await initDb();
+    List<Map<String, Object?>> translateList = await db.query('MYDB');
+
+    return translateList.map((e) => TranslateModel.fromMap(e)).toList();
+  }
+
+  Future<int> delete(int id) async {
+    Database db = await initDb();
+    return await db.delete(
+      'MYDB',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  Future close() async {
+    Database db = await initDb();
+
+    return db.close();
   }
 }
