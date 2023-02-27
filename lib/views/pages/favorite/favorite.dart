@@ -7,7 +7,6 @@ import 'package:korea_to_english_translator/views/constants/assets.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:korea_to_english_translator/views/constants/colors.dart';
 import 'package:get/get.dart';
-import 'package:get/get.dart';
 
 class FavoritePage extends StatefulWidget {
   const FavoritePage({super.key});
@@ -127,7 +126,7 @@ class _FavoritePageState extends State<FavoritePage> {
                                     borderRadius: BorderRadius.only(
                                         topLeft: Radius.circular(7.0),
                                         topRight: Radius.circular(7.0)),
-                                    color: bgColorPro.withOpacity(0.2)),
+                                    color: Colors.pink.withOpacity(0.1)),
                                 child: Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
@@ -147,7 +146,7 @@ class _FavoritePageState extends State<FavoritePage> {
                                         },
                                         icon: Icon(
                                           Icons.delete_outline,
-                                          color: Colors.red.withOpacity(0.4),
+                                          color: Colors.white.withOpacity(0.4),
                                         )),
                                   ],
                                 ),

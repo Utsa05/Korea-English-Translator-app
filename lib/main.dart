@@ -22,8 +22,11 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: appName,
       // visualDensity: VisualDensity.adaptivePlatformDensity,
-      theme: ThemeData(),
+      theme: ThemeData(
+          bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+              elevation: 0.0, backgroundColor: Colors.transparent)),
       getPages: AppRoute.routes(),
+
       initialRoute: initialRoute,
     );
   }

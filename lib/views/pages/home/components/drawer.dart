@@ -1,4 +1,4 @@
-// ignore_for_file: depend_on_referenced_packages
+// ignore_for_file: depend_on_referenced_packages, deprecated_member_use
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -8,6 +8,7 @@ import 'package:glassmorphism/glassmorphism.dart';
 import 'package:korea_to_english_translator/views/constants/colors.dart';
 import 'package:korea_to_english_translator/views/constants/routes.dart';
 import 'package:korea_to_english_translator/views/constants/strings.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({
@@ -19,6 +20,14 @@ class AppDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    urlLaunce(String uri) async {
+      if (await canLaunch(uri)) {
+        await launch(uri);
+      } else {
+        throw 'Could not launch $uri';
+      }
+    }
+
     return Container(
       width: 270.0,
       decoration: const BoxDecoration(
@@ -140,7 +149,9 @@ class AppDrawer extends StatelessWidget {
                       ],
                     ),
                     child: ListTile(
-                      onTap: () {},
+                      onTap: () {
+                        urlLaunce("https://textsaver.flap.tv/lists/5h25");
+                      },
                       tileColor: bgColorPro,
                       leading: const Icon(
                         Icons.privacy_tip,
@@ -183,7 +194,10 @@ class AppDrawer extends StatelessWidget {
                       ],
                     ),
                     child: ListTile(
-                      onTap: () {},
+                      onTap: () {
+                        urlLaunce(
+                            "https://play.google.com/store/apps/developer?id=Null-IT");
+                      },
                       tileColor: bgColorPro,
                       leading: const Icon(
                         Icons.more_horiz,

@@ -1,4 +1,4 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
+// ignore_for_file: public_member_api_docs, sort_constructors_first, avoid_print
 // ignore_for_file: prefer_const_constructors, depend_on_referenced_packages
 
 import 'package:flutter/material.dart';
@@ -13,6 +13,10 @@ import 'package:korea_to_english_translator/views/constants/assets.dart';
 import 'package:korea_to_english_translator/views/constants/colors.dart';
 import 'package:korea_to_english_translator/views/pages/home/components/drawer.dart';
 import 'package:korea_to_english_translator/views/widgets/snackbar.dart';
+import 'package:clipboard/clipboard.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:text_to_speech/text_to_speech.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -26,67 +30,105 @@ class _HomePageState extends State<HomePage> {
   final _homeController = Get.put(HomeController());
   bool animated = false;
 
+  late BannerAd _bannerAd;
+  bool _isBannerAdReady = false;
+
+  @override
+  void initState() {
+    _loadBannerAd('ca-app-pub-3080837536061201/2182987194');
+
+    super.initState();
+  }
+
+  void _loadBannerAd(String adId) {
+    _bannerAd = BannerAd(
+      adUnitId: adId,
+      request: const AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (_) {
+          setState(() {
+            _isBannerAdReady = true;
+          });
+        },
+        onAdFailedToLoad: (ad, err) {
+          _isBannerAdReady = false;
+          ad.dispose();
+        },
+      ),
+    );
+
+    _bannerAd.load();
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
-      drawer: AppDrawer(size: size),
-      key: _scaffoldKey,
-      appBar: appBar(_scaffoldKey, _homeController),
-      extendBodyBehindAppBar: true,
-      body: Container(
-        height: size.height,
-        width: size.width,
-        decoration: const BoxDecoration(
-            image: DecorationImage(
-                //opacity: 0.9,
-                image: AssetImage(
-                  randomBg,
-                ),
-                fit: BoxFit.cover)),
-        child: GlassmorphicContainer(
-            width: size.width,
-            height: size.height,
-            borderRadius: 0,
-            blur: 5,
-            alignment: Alignment.topCenter,
-            border: 0,
-            linearGradient: LinearGradient(
+        drawer: AppDrawer(size: size),
+        key: _scaffoldKey,
+        appBar: appBar(_scaffoldKey, _homeController),
+        extendBodyBehindAppBar: true,
+        body: Container(
+          height: size.height,
+          width: size.width,
+          decoration: const BoxDecoration(
+              image: DecorationImage(
+                  //opacity: 0.9,
+                  image: AssetImage(
+                    randomBg,
+                  ),
+                  fit: BoxFit.cover)),
+          child: GlassmorphicContainer(
+              width: size.width,
+              height: size.height,
+              borderRadius: 0,
+              blur: 5,
+              alignment: Alignment.topCenter,
+              border: 0,
+              linearGradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    const Color(0xFFffffff).withOpacity(0.1),
+                    const Color(0xFFFFFFFF).withOpacity(0.05),
+                  ],
+                  stops: const [
+                    0.1,
+                    1,
+                  ]),
+              borderGradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  const Color(0xFFffffff).withOpacity(0.1),
-                  const Color(0xFFFFFFFF).withOpacity(0.05),
-                ],
-                stops: const [
-                  0.1,
-                  1,
-                ]),
-            borderGradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Color.fromARGB(255, 50, 84, 255).withOpacity(0.5),
-                Color.fromARGB(255, 255, 18, 117).withOpacity(0.5),
-              ],
-            ),
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  TypeView(
-                    size: size,
-                    homeController: _homeController,
-                  ),
-                  ResultView(
-                    size: size,
-                    homeController: _homeController,
-                  ),
+                  Color.fromARGB(255, 50, 84, 255).withOpacity(0.5),
+                  Color.fromARGB(255, 255, 18, 117).withOpacity(0.5),
                 ],
               ),
-            )),
-      ),
-    );
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    TypeView(
+                      size: size,
+                      homeController: _homeController,
+                    ),
+                    ResultView(
+                      size: size,
+                      homeController: _homeController,
+                    ),
+                  ],
+                ),
+              )),
+        ),
+        bottomNavigationBar: _isBannerAdReady
+            ? Container(
+                color: bgColor,
+                width: _bannerAd.size.width.toDouble(),
+                height: _bannerAd.size.height.toDouble(),
+                child: AdWidget(ad: _bannerAd),
+              )
+            : const SizedBox());
   }
 
   AppBar appBar(GlobalKey<ScaffoldState> key, HomeController controller) {
@@ -203,7 +245,7 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-class ResultView extends StatelessWidget {
+class ResultView extends StatefulWidget {
   const ResultView({
     Key? key,
     required this.size,
@@ -214,11 +256,18 @@ class ResultView extends StatelessWidget {
   final HomeController homeController;
 
   @override
+  State<ResultView> createState() => _ResultViewState();
+}
+
+class _ResultViewState extends State<ResultView> {
+  bool _isSpeaching = false;
+  TextToSpeech tts = TextToSpeech();
+  @override
   Widget build(BuildContext context) {
     return GlassmorphicContainer(
         margin: const EdgeInsets.only(top: 20.0, left: 15.0, right: 15.0),
-        width: size.width,
-        height: size.height * 0.3,
+        width: widget.size.width,
+        height: widget.size.height * 0.3,
         borderRadius: 20,
         blur: 10,
         alignment: Alignment.bottomCenter,
@@ -243,26 +292,28 @@ class ResultView extends StatelessWidget {
           ],
         ),
         child: Obx(() {
-          return homeController.isTranslating.value == false
+          return widget.homeController.isTranslating.value == false
               ? Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                        child: Padding(
+                        child: Container(
+                      width: double.infinity,
                       padding: const EdgeInsets.only(
                           left: 15.0, right: 15.0, top: 14.0),
                       child: SingleChildScrollView(
                         physics: const BouncingScrollPhysics(),
                         child: Obx(() {
                           return Text(
-                            homeController.translatorText.value,
+                            widget.homeController.translatorText.value,
                             style: GoogleFonts.openSans(color: blackColor),
                             textAlign: TextAlign.start,
                           );
                         }),
                       ),
                     )),
-                    homeController.textController.value.text.isNotEmpty
+                    Obx(() => widget
+                            .homeController.textController.value.text.isNotEmpty
                         ? Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Row(
@@ -273,13 +324,18 @@ class ResultView extends StatelessWidget {
                                   icon: Icons.favorite_border_outlined,
                                   color: bgColor,
                                   tap: () {
-                                    if (homeController
-                                        .textController.value.text.isNotEmpty) {
-                                      homeController.insert(TranslateModel(
-                                          sendLang: homeController
-                                              .textController.value.text,
-                                          resultLang: homeController
-                                              .translatorText.value));
+                                    if (widget.homeController.textController
+                                        .value.text.isNotEmpty) {
+                                      widget.homeController.insert(
+                                          TranslateModel(
+                                              sendLang:
+                                                  widget
+                                                      .homeController
+                                                      .textController
+                                                      .value
+                                                      .text,
+                                              resultLang: widget.homeController
+                                                  .translatorText.value));
 
                                       appSnackBar(context, "Added To Favorite");
                                     } else {
@@ -294,7 +350,21 @@ class ResultView extends StatelessWidget {
                                 CircleButton(
                                   icon: Icons.copy_outlined,
                                   color: bgColor,
-                                  tap: () {},
+                                  tap: () {
+                                    if (widget.homeController.translatorText
+                                        .isNotEmpty) {
+                                      FlutterClipboard.copy(widget
+                                              .homeController
+                                              .translatorText
+                                              .value)
+                                          .then((value) => print('copied'));
+
+                                      appSnackBar(context, "Coppied");
+                                    } else {
+                                      appSnackBar(context,
+                                          "Please Your Need Translate First");
+                                    }
+                                  },
                                 ),
                                 SizedBox(
                                   width: 12.0,
@@ -302,20 +372,55 @@ class ResultView extends StatelessWidget {
                                 CircleButton(
                                   icon: Icons.share_outlined,
                                   color: bgColor,
-                                  tap: () {},
+                                  tap: () {
+                                    if (widget.homeController.translatorText
+                                        .isNotEmpty) {
+                                      Share.share(
+                                          'Share from Korea to English Translator app\n\n${widget.homeController.sendLang.value}:${widget.homeController.textController.value.text}\n${widget.homeController.resultLang.value}:${widget.homeController.translatorText.value}\n\nGoogle Playstore',
+                                          subject: 'Translated');
+
+                                      appSnackBar(context, "Coppied");
+                                    } else {
+                                      appSnackBar(context,
+                                          "Please Your Need Translate First");
+                                    }
+                                  },
                                 ),
                                 SizedBox(
                                   width: 12.0,
                                 ),
                                 CircleButton(
-                                  icon: Icons.play_arrow_outlined,
+                                  icon: _isSpeaching == false
+                                      ? Icons.play_arrow_outlined
+                                      : Icons.pause_outlined,
                                   color: bgColor,
-                                  tap: () {},
+                                  tap: () async {
+                                    if (widget.homeController.translatorText
+                                        .isNotEmpty) {
+                                      if (_isSpeaching == false) {
+                                        _isSpeaching = true;
+                                        tts.speak(widget.homeController
+                                            .translatorText.value);
+
+                                        // if (await tts.stop() == true) {
+                                        //   _isSpeaching = false;
+                                        // }
+                                      } else {
+                                        tts.stop();
+                                        _isSpeaching = false;
+                                      }
+
+                                      setState(() {});
+                                    } else {
+                                      appSnackBar(context,
+                                          "Please Your Need Translate First");
+                                    }
+                                  },
                                 ),
                               ],
                             ),
                           )
-                        : const SizedBox()
+                        : const SizedBox())
                   ],
                 )
               : Center(
@@ -326,7 +431,7 @@ class ResultView extends StatelessWidget {
   }
 }
 
-class TypeView extends StatelessWidget {
+class TypeView extends StatefulWidget {
   const TypeView({
     super.key,
     required this.size,
@@ -335,12 +440,83 @@ class TypeView extends StatelessWidget {
 
   final Size size;
   final HomeController homeController;
+
+  @override
+  State<TypeView> createState() => _TypeViewState();
+}
+
+class _TypeViewState extends State<TypeView> {
+  InterstitialAd? _interstitialAd;
+  bool _isFirstTime = true;
+  int numofitemClick = 0;
+
+  @override
+  void initState() {
+    _createInterstitialAd();
+    super.initState();
+  }
+
+  void _createInterstitialAd() {
+    InterstitialAd.load(
+        adUnitId: 'ca-app-pub-3080837536061201/7243742187',
+        request: const AdRequest(),
+        adLoadCallback: InterstitialAdLoadCallback(
+          onAdLoaded: (InterstitialAd ad) {
+            print('$ad loaded');
+            _interstitialAd = ad;
+
+            _interstitialAd!.setImmersiveMode(true);
+          },
+          onAdFailedToLoad: (LoadAdError error) {},
+        ));
+  }
+
+  void counterFun() {
+    if (_isFirstTime == true) {
+      _showInterstitialAd();
+      _isFirstTime = false;
+    }
+    if (_interstitialAd == null) {
+      _createInterstitialAd();
+    }
+    if (numofitemClick <= 3) {
+      numofitemClick++;
+    } else {
+      _showInterstitialAd();
+      numofitemClick = 0;
+    }
+    print(numofitemClick);
+  }
+
+  void _showInterstitialAd() {
+    if (_interstitialAd == null) {
+      print('Warning: attempt to show interstitial before loaded.');
+      return;
+    }
+    _interstitialAd!.fullScreenContentCallback = FullScreenContentCallback(
+      onAdShowedFullScreenContent: (InterstitialAd ad) =>
+          print('ad onAdShowedFullScreenContent.'),
+      onAdDismissedFullScreenContent: (InterstitialAd ad) {
+        print('$ad onAdDismissedFullScreenContent.');
+        ad.dispose();
+        // _createInterstitialAd();
+      },
+      onAdFailedToShowFullScreenContent: (InterstitialAd ad, AdError error) {
+        print('$ad onAdFailedToShowFullScreenContent: $error');
+        ad.dispose();
+        // _createInterstitialAd();
+      },
+    );
+    _interstitialAd!.show();
+    _interstitialAd = null;
+  }
+
   @override
   Widget build(BuildContext context) {
     return GlassmorphicContainer(
         margin: const EdgeInsets.only(top: 100.0, left: 15.0, right: 15.0),
-        width: size.width,
-        height: size.height * 0.3,
+        width: widget.size.width,
+        height: widget.size.height * 0.3,
         borderRadius: 20,
         blur: 10,
         alignment: Alignment.bottomCenter,
@@ -368,7 +544,7 @@ class TypeView extends StatelessWidget {
           children: [
             Expanded(
                 child: TextField(
-              controller: homeController.textController.value,
+              controller: widget.homeController.textController.value,
               style: GoogleFonts.openSans(color: titleColor),
               maxLines: 12,
               cursorColor: bgColor,
@@ -398,11 +574,13 @@ class TypeView extends StatelessWidget {
                     icon: Icons.bookmark_outline_outlined,
                     color: bgColor,
                     tap: () {
-                      if (homeController.saveText.value.isNotEmpty) {
-                        if (homeController.textController.value.text !=
-                            homeController.saveText.value) {
-                          homeController.textController.value.text =
-                              homeController.saveText.value;
+                      if (widget.homeController.saveText.value.isNotEmpty) {
+                        if (widget.homeController.textController.value.text !=
+                            widget.homeController.saveText.value) {
+                          widget.homeController.textController.value.text =
+                              widget.homeController.saveText.value;
+
+                          counterFun();
                         } else {
                           appSnackBar(context, "No Need to Change");
                         }
@@ -482,7 +660,8 @@ class TypeView extends StatelessWidget {
                                               splashRadius: 25.0,
                                               onPressed: () {
                                                 Navigator.pop(context);
-                                                homeController.getImage(context,
+                                                widget.homeController.getImage(
+                                                    context,
                                                     ImageSource.camera);
                                               },
                                               icon: Icon(
@@ -500,8 +679,11 @@ class TypeView extends StatelessWidget {
                                               splashRadius: 25.0,
                                               onPressed: () {
                                                 Navigator.pop(context);
-                                                homeController.getImage(context,
+                                                widget.homeController.getImage(
+                                                    context,
                                                     ImageSource.gallery);
+
+                                                counterFun();
                                               },
                                               icon: Icon(
                                                 Icons.save_outlined,
@@ -515,6 +697,7 @@ class TypeView extends StatelessWidget {
                               ),
                             );
                           });
+                      counterFun();
                     },
                   ),
                   SizedBox(
@@ -524,7 +707,7 @@ class TypeView extends StatelessWidget {
                     icon: Icons.mic_outlined,
                     color: bgColor,
                     tap: () {
-                      homeController.listen(context);
+                      widget.homeController.listen(context);
                       showModalBottomSheet(
                           isDismissible: false,
                           enableDrag: false,
@@ -545,6 +728,7 @@ class TypeView extends StatelessWidget {
                               ),
                             );
                           });
+                      counterFun();
                     },
                   ),
                   SizedBox(
@@ -561,8 +745,10 @@ class TypeView extends StatelessWidget {
                     icon: Icons.close,
                     color: redColor,
                     tap: () {
-                      if (homeController.textController.value.text.isNotEmpty) {
-                        homeController.textController.value.clear();
+                      if (widget.homeController.textController.value.text
+                          .isNotEmpty) {
+                        widget.homeController.textController.value.clear();
+                        counterFun();
                       } else {
                         appSnackBar(context, "Nothing Typed");
                       }
@@ -574,15 +760,17 @@ class TypeView extends StatelessWidget {
                   ),
                   IconButton(
                       onPressed: () {
-                        if (homeController
-                            .textController.value.text.isNotEmpty) {
-                          if (homeController.sendLang.value == "Korea") {
-                            homeController.translateNow(
+                        if (widget.homeController.textController.value.text
+                            .isNotEmpty) {
+                          if (widget.homeController.sendLang.value == "Korea") {
+                            widget.homeController.translateNow(
                                 from: 'ko', to: 'en', context: context);
                           } else {
-                            homeController.translateNow(
+                            widget.homeController.translateNow(
                                 from: 'en', to: 'ko', context: context);
                           }
+
+                          counterFun();
                         } else {
                           appSnackBar(context, "Pleasy Type Somthing");
                         }
