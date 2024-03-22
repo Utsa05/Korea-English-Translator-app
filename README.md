@@ -1,6 +1,8 @@
 # korea_to_english_translator
 
-A new Flutter project.
+Getx
+MVC
+SQLite
 
 ## Getting Started
 
